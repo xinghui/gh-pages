@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" ng-app="phonecatApp">
+
+<head>
+    <meta charset="utf-8">
+    <title>Google Phone Gallery</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="css/app.css">
+    <script src="bower_components/angular/angular.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+
+
+            </div>
+            <div class="col-md-10" ng-controller="gitctrl">
+                
+                GithubUserName:<input id="user" type="text" ng-model="user" >
+                <p style="color:red">{{error.message}}</p>
+                <p>{{error.documentation_url}}</p>
+
+                <ul>
+                    <li ng-repeat="repo in repos">
+                        <a href="{{repo.html_url}}">{{repo.full_name}}</a>
+                        <ul>
+                            <li ng-repeat="abc in branches[repo.full_name]">
+                                <p ng-if="abc.name=='gh-pages'" style="color:red">{{abc.name}}</p>
+                                <p ng-if="abc.name!='gh-pages'">{{abc.name}}</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+    
+    <script type="text/javascript">
+        function gitctrl($http,$scope){
+            $scope.$watch('user || "xinghui"', function(user){
+                $http.get("https://api.github.com/users/" + user + "/repos").success(function (data) {
+//                    $scope.repos = data.splice(0, 3);
+                    $scope.repos = data;
+                    
+                    angular.forEach($scope.repos,function(repo){
+                        $scope.getbranch(repo.full_name);
+                    });
+                    
+                }).error(function(data){
+                    $scope.error = data;
+                });
+            });
+            
+            $scope.branches = {};
+            
+            $scope.getbranch = function(full_name){
+                $http.get("https://api.github.com/repos/" + full_name + "/branches").success(function (data) {
+                    $scope.branches[full_name] = data;
+                });
+            }
+        }
+        
+        
+        angular.module('phonecatApp', []);
+    </script>
+
+</html>
